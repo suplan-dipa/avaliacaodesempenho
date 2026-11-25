@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Roteiros · Gestão do Desempenho por Competências</title>
+<style>
+:root{
+  --ink:#1c2733; --muted:#5b6876; --line:#c9d3dd; --soft:#eef3f7; --soft2:#f7f9fb;
+  --pri:#16527a; --pri2:#0e3a57; --acc:#2a8c82; --warn:#b4541a; --ok:#2f7d32;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:#e9eef2;color:var(--ink);font:13px/1.4 "Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+button{font:inherit;cursor:pointer}
+/* ---------- barra superior ---------- */
+.topbar{position:sticky;top:0;z-index:10;background:var(--pri2);color:#fff;padding:10px 18px;display:flex;gap:14px;align-items:center;flex-wrap:wrap;box-shadow:0 2px 6px rgba(0,0,0,.15)}
+.topbar h1{font-size:15px;margin:0;font-weight:600;flex:1;min-width:240px}
+.topbar h1 small{display:block;font-weight:400;opacity:.75;font-size:11.5px}
+.btn{border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.08);color:#fff;padding:6px 11px;border-radius:5px}
+.btn:hover{background:rgba(255,255,255,.18)}
+.btn.primary{background:#fff;color:var(--pri2);border-color:#fff;font-weight:600}
+.btn.ghost{border-style:dashed}
+.status{font-size:11.5px;opacity:.8;min-width:120px;text-align:right}
+.tabs{display:flex;gap:4px;padding:12px 18px 0;max-width:1060px;margin:0 auto}
+.tab{border:1px solid var(--line);border-bottom:none;background:#dde5ec;color:var(--muted);padding:9px 16px;border-radius:7px 7px 0 0;font-weight:600}
+.tab.active{background:#fff;color:var(--pri2)}
+.tab .n{display:inline-block;width:20px;height:20px;border-radius:50%;background:var(--pri);color:#fff;font-size:11px;line-height:20px;text-align:center;margin-right:6px}
+/* ---------- folha ---------- */
+.sheet{display:none;background:#fff;max-width:1060px;margin:0 auto 40px;padding:22px 28px 26px;border:1px solid var(--line);border-radius:0 8px 8px 8px}
+.sheet.active{display:block}
+.doc-head{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2.5px solid var(--pri);padding-bottom:6px;margin-bottom:10px}
+.doc-head .org{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.doc-head h2{margin:2px 0 0;font-size:18px;color:var(--pri2)}
+.doc-head .ref{font-size:10.5px;color:var(--muted);text-align:right}
+.intro{font-size:11.5px;color:var(--muted);margin:0 0 8px}
+section{margin-top:10px}
+h3{font-size:12.5px;margin:0 0 5px;color:#fff;background:var(--pri);padding:3px 8px;border-radius:3px;display:flex;justify-content:space-between;align-items:center}
+h3 .hint{font-weight:400;font-size:10.5px;opacity:.85}
+.grid{display:grid;gap:5px 10px}
+.g4{grid-template-columns:2.2fr 1fr 1.6fr 1.6fr}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g2{grid-template-columns:1fr 1fr}
+.f{display:flex;flex-direction:column;min-width:0}
+.f>span{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;margin-bottom:1px}
+input[type=text],input[type=number],input[type=date],select,textarea{font:inherit;font-size:12.5px;color:var(--ink);border:1px solid var(--line);border-radius:4px;padding:4px 6px;background:var(--soft2);width:100%}
+input:focus,select:focus,textarea:focus{outline:2px solid #9cc3e0;background:#fff}
+textarea{resize:vertical;min-height:30px}
+.pt,.ps{display:none}
+table.fx{table-layout:fixed}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.chk{display:flex;gap:6px;align-items:flex-start;font-size:12px}
+.chk input{margin-top:2px}
+.checks{display:grid;grid-template-columns:1fr 1fr;gap:2px 16px}
+.chip{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;background:var(--soft);color:var(--muted)}
+.chip.ok{background:#e1f1e2;color:var(--ok)}
+.chip.no{background:#fbe8dc;color:var(--warn)}
+.note{font-size:10.5px;color:var(--muted);margin:4px 0 0}
+.box{border:1px solid var(--line);border-radius:4px;padding:6px 8px;background:var(--soft2)}
+/* ---------- tabelas ---------- */
+table{width:100%;border-collapse:collapse;font-size:12px}
+th,td{border:1px solid var(--line);padding:3px 5px;vertical-align:middle}
+th{background:var(--soft);font-size:10.5px;color:var(--pri2);text-align:center;font-weight:600}
+td input,td select,td textarea{border:none;background:transparent;padding:2px 3px;font-size:12px}
+td textarea{min-height:22px}
+td.c{text-align:center}
+tr.comp td{background:#e4edf4;font-weight:700;color:var(--pri2)}
+tr.comp td .pct{float:right;font-weight:600}
+tr.ev td{background:#fbfcfd}
+.ev-lab{font-size:10.5px;color:var(--muted);white-space:nowrap;flex:none}
+.scale{display:inline-flex;gap:3px}
+.scale label{position:relative}
+.scale input{position:absolute;opacity:0;width:0;height:0}
+.scale span{display:inline-block;width:21px;height:21px;line-height:19px;border:1.5px solid #9fb2c3;border-radius:50%;text-align:center;font-size:11px;color:var(--muted);cursor:pointer;background:#fff}
+.scale input:checked+span{background:var(--pri);border-color:var(--pri);color:#fff;font-weight:700}
+.scale input:focus-visible+span{outline:2px solid #9cc3e0}
+.res{font-weight:700;color:var(--pri2);text-align:center;width:52px}
+.legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:10.5px;color:var(--muted);margin:3px 0 5px}
+.legend b{color:var(--pri2)}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.kpi{border:1px solid var(--line);border-radius:5px;padding:5px 8px;background:var(--soft2)}
+.kpi span{display:block;font-size:10px;text-transform:uppercase;color:var(--muted)}
+.kpi b{font-size:17px;color:var(--pri2)}
+.kpi.main{border-color:var(--pri);background:#eaf2f8}
+.addrow{margin-top:4px;border:1px dashed var(--line);background:#fff;color:var(--pri);padding:3px 10px;border-radius:4px;font-size:11.5px}
+.del{border:none;background:none;color:#a33;font-size:14px;padding:0 4px}
+.sig{display:grid;grid-template-columns:1fr 1fr 150px;gap:24px;margin-top:22px}
+.sig div{border-top:1px solid var(--ink);padding-top:3px;font-size:10.5px;text-align:center;color:var(--muted)}
+.diag{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.diag ul{margin:2px 0 0;padding-left:16px;font-size:11.5px}
+.diag li{margin:1px 0}
+.diag .empty{font-size:11px;color:var(--muted);font-style:italic}
+.foot{margin-top:12px;border-top:1px solid var(--line);padding-top:5px;font-size:9.5px;color:var(--muted);display:flex;justify-content:space-between;gap:10px}
+.adep-only{display:none}
+body.is-adep .adep-only{display:revert}
+.cnum{width:22px;text-align:center;color:var(--muted);font-size:11px}
+
+/* ---------- impressão ---------- */
+@page{size:A4 portrait;margin:11mm 11mm 10mm}
+@media print{
+  html,body{background:#fff;font-size:8.6pt}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .topbar,.tabs,.addrow,.del,.noprint{display:none!important}
+  .sheet{display:none;border:none;padding:0;margin:0;max-width:none;border-radius:0}
+  body:not(.print-all) .sheet.active{display:block}
+  body.print-all .sheet{display:block;break-before:page}
+  body.print-all .sheet:first-of-type{break-before:auto}
+  .doc-head h2{font-size:13pt}
+  .intro{font-size:8pt;margin-bottom:4px}
+  section{margin-top:6px;break-inside:auto}
+  h3{font-size:9pt;padding:2px 6px;margin-bottom:3px}
+  h3 .hint{font-size:7.5pt}
+  .f>span{font-size:6.8pt}
+  input[type=text],input[type=number],input[type=date],select{font-size:8.6pt;background:none;border:none;border-bottom:1px solid #aab6c2;border-radius:0;padding:1px 2px;appearance:none;-webkit-appearance:none}
+  input[type=date]::-webkit-calendar-picker-indicator{display:none}
+  textarea,select{display:none!important}
+  .ps{display:block;font-size:8.6pt;border-bottom:1px solid #aab6c2;padding:1px 2px;min-height:1.4em;line-height:1.35}
+  td .ps{border-bottom:none;font-size:8.1pt}
+  col.noprint{width:0}
+  .pt{display:block;white-space:pre-wrap;word-wrap:break-word;font-size:8.6pt;border-bottom:1px solid #aab6c2;padding:1px 2px;min-height:var(--mh,1.4em);line-height:1.35}
+  td .pt{border-bottom:none;min-height:1.35em}
+  table{font-size:8.3pt}
+  th{font-size:7.3pt}
+  th,td{padding:1.5px 3px}
+  td input,td select{border:none!important;font-size:8.3pt}
+  tr{break-inside:avoid}
+  h3{break-after:avoid}
+  .kpis,.legend,.sig,.checks{break-inside:avoid}
+  .keep{break-inside:avoid}
+  .scale span{width:15px;height:15px;line-height:13px;font-size:7.5pt;border-width:1px}
+  .legend,.note{font-size:7.3pt}
+  .kpi{padding:3px 6px}.kpi b{font-size:11.5pt}.kpi span{font-size:6.8pt}
+  .chk{font-size:8.2pt}
+  .diag ul{font-size:8pt}
+  .sig{margin-top:18px}
+  .sig div{font-size:7.5pt}
+  .foot{font-size:7pt;margin-top:6px}
+  .box{background:none}
+}
+@media (max-width:760px){.g4,.g3,.g2,.checks,.kpis,.diag{grid-template-columns:1fr 1fr}.sheet{padding:14px}}
+/* ---------- consolidação ---------- */
+.modal{position:fixed;inset:0;background:rgba(14,30,45,.55);z-index:50;display:none;align-items:flex-start;justify-content:center;padding:4vh 16px;overflow:auto}
+.modal.open{display:flex}
+.dlg{background:#fff;border-radius:8px;max-width:960px;width:100%;box-shadow:0 12px 40px rgba(0,0,0,.3);display:flex;flex-direction:column;max-height:92vh}
+.dlg header{padding:12px 18px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+.dlg header h2{margin:0;font-size:16px;color:var(--pri2)}
+.dlg .bd{padding:12px 18px;overflow:auto}
+.dlg footer{padding:10px 18px;border-top:1px solid var(--line);display:flex;gap:8px;justify-content:flex-end;align-items:center}
+.dlg footer .sp{flex:1;font-size:11.5px;color:var(--muted)}
+.dlg h4{margin:12px 0 5px;font-size:12.5px;color:var(--pri2)}
+.dlg table td,.dlg table th{font-size:11.5px}
+.dlg td select{border:1px solid var(--line);background:var(--soft2);font-size:11.5px}
+.bbtn{border:1px solid var(--line);background:#fff;color:var(--ink);padding:6px 12px;border-radius:5px}
+.bbtn.pri{background:var(--pri);border-color:var(--pri);color:#fff;font-weight:600}
+.warnbox{background:#fdf1e7;border:1px solid #efc6a4;color:#7a3a10;border-radius:5px;padding:6px 10px;font-size:12px;margin:6px 0}
+.sumgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px}
+.vals{font-size:11px;color:var(--muted)}
+.vals div{margin:1px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:330px}
+@media print{.modal{display:none!important}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <h1>Roteiros da Gestão do Desempenho por Competências
+    <small>Avaliação · Plano de Desenvolvimento · Plano de Acompanhamento (PADP)</small></h1>
+  <button class="btn" id="btnOpen" title="Selecione 1 arquivo para abrir ou 2 ou mais para consolidar em um único preenchimento">Abrir / consolidar JSON</button>
+  <button class="btn" id="btnSave" title="Baixar o preenchimento para continuar depois">Salvar JSON</button>
+  <button class="btn primary" id="btnPrint" title="Imprimir ou salvar em PDF a aba atual">Imprimir / PDF (aba)</button>
+  <button class="btn" id="btnPrintAll" title="Imprimir os três roteiros em sequência">Imprimir os três</button>
+  <button class="btn ghost" id="btnClear">Limpar</button>
+  <span class="status" id="status">—</span>
+  <input type="file" id="fileIn" accept=".json,application/json" multiple hidden>
+</div>
+
+<nav class="tabs" role="tablist">
+  <button class="tab active" data-tab="av" role="tab"><span class="n">1</span>Avaliação de Desempenho</button>
+  <button class="tab" data-tab="pd" role="tab"><span class="n">2</span>Plano de Desenvolvimento</button>
+  <button class="tab" data-tab="pa" role="tab"><span class="n">3</span>Plano de Acompanhamento</button>
+</nav>
+
+<!-- =============================== ABA 1 =============================== -->
+<main class="sheet active" id="sheet-av">
+  <div class="doc-head">
+    <div><div class="org">Prefeitura de Belo Horizonte · Gestão do Desempenho por Competências</div>
+    <h2>Roteiro de Avaliação de Desempenho</h2></div>
+    <div class="ref">Termo de Avaliação · ciclo 1º/jan–31/dez<br>Decretos nº 17.045 e 17.046/2019</div>
+  </div>
+  <p class="intro">Roteiro de apoio para o gestor preparar o Termo de Avaliação e o feedback ao servidor. Avalie comportamentos observados ao longo de todo o ciclo, com fatos e exemplos. O registro oficial é feito no ARTEComp (Portal do Servidor).</p>
+
+  <section class="ident"></section>
+
+  <section>
+    <h3>1. Pré-requisitos e preparação</h3>
+    <div class="grid g3">
+      <label class="f"><span>Dias efetivamente trabalhados no ciclo (mín. 60)</span><input type="number" min="0" max="366" data-k="av.dias"></label>
+      <label class="f"><span>Dias trabalhados como gestor (ADG: mín. 40)</span><input type="number" min="0" max="366" data-k="av.diasGestor"></label>
+      <div class="f"><span>Situação para ser avaliado</span><div style="padding-top:3px"><span class="chip" id="elig">Informe os dias</span></div></div>
+    </div>
+    <div class="checks" style="margin-top:5px">
+      <label class="chk"><input type="checkbox" data-k="av.prep1">PADP do ciclo e registros de acompanhamento revisados</label>
+      <label class="chk"><input type="checkbox" data-k="av.prep2">Fatos e exemplos reunidos de todo o ciclo, não só dos fatos recentes</label>
+      <label class="chk"><input type="checkbox" data-k="av.prep3">Foco em comportamentos observados, sem impressões pessoais</label>
+    </div>
+    <p class="note">Não contam como dias trabalhados: descanso semanal, feriados, pontos facultativos, férias, licença assiduidade, licenças/afastamentos e faltas injustificadas. Contagem até 31/out (avaliação em novembro) ou 30/nov (avaliação em dezembro).</p>
+  </section>
+
+  <section>
+    <h3>2. Competências essenciais · comportamentos observáveis <span class="hint">avaliação do gestor</span></h3>
+    <div class="legend"><span><b>1</b> Precisa desenvolver-se quase totalmente</span><span><b>2</b> Precisa melhorar o desempenho</span><span><b>3</b> Faz normalmente o que se espera</span><span><b>4</b> Atende plenamente</span></div>
+    <table id="tabAval">
+      <colgroup><col><col style="width:130px"></colgroup>
+      <thead><tr><th style="text-align:left">Comportamento observável</th><th>Avaliação (1–4)</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <p class="note">Para gestores (ADG) as competências avaliadas são as gerenciais — Gestão de Pessoas, Comunicação e Gestão Estratégica — conforme o Termo específico; cargos com competências específicas mapeadas seguem o próprio Termo.</p>
+  </section>
+
+  <section class="keep">
+    <h3>3. Resultado <span class="hint">indicativo · escala 1–4 convertida em %</span></h3>
+    <div class="kpis">
+      <div class="kpi"><span>Proatividade</span><b id="k-pro">—</b></div>
+      <div class="kpi"><span>Trabalho em Equipe</span><b id="k-eq">—</b></div>
+      <div class="kpi"><span>Orientação para Resultados</span><b id="k-res">—</b></div>
+      <div class="kpi main"><span>Resultado geral · <i id="kItens" style="font-style:normal">0/11 itens</i></span><b id="kFinal">—</b></div>
+    </div>
+    <div class="row adep-only" style="margin-top:5px">
+      <span style="font-size:11px;color:var(--muted)">ADEP — resultados de etapas anteriores (%):</span>
+      <input type="number" min="0" max="100" step="0.1" data-k="av.etapaA" style="width:80px" placeholder="1ª etapa">
+      <input type="number" min="0" max="100" step="0.1" data-k="av.etapaB" style="width:80px" placeholder="2ª etapa">
+      <span class="chip" id="adepMedia">Média: —</span>
+    </div>
+    <p class="note adep-only">APTO: média igual ou superior a 70% do somatório dos pontos das três avaliações + 1.095 dias de efetivo exercício (Parecer Conclusivo da CADEP).</p>
+  </section>
+
+  <section>
+    <h3>4. Feedback</h3>
+    <div class="grid g3" style="grid-template-columns:150px 1fr 1fr">
+      <label class="f"><span>Data da conversa</span><input type="date" data-k="av.fbData"></label>
+      <label class="f" style="grid-column:span 2"><span>Pontos fortes (com exemplos)</span><textarea rows="2" data-k="av.fortes"></textarea></label>
+    </div>
+    <div class="grid g2" style="margin-top:5px">
+      <label class="f"><span>Comportamentos a desenvolver (alimentam o Plano de Desenvolvimento)</span><textarea rows="2" data-k="av.melhorar"></textarea></label>
+      <label class="f"><span>Combinados e encaminhamentos</span><textarea rows="2" data-k="av.combinados"></textarea></label>
+    </div>
+    <div class="checks" style="margin-top:5px">
+      <label class="chk"><input type="checkbox" data-k="av.fb1">Local reservado e momento tranquilo</label>
+      <label class="chk"><input type="checkbox" data-k="av.fb2">Fatos objetivos, sem rótulos ou suposições</label>
+      <label class="chk"><input type="checkbox" data-k="av.fb3">Equilíbrio entre acertos e pontos de melhoria</label>
+      <label class="chk"><input type="checkbox" data-k="av.fb4">Servidor reformulou a mensagem com suas palavras</label>
+    </div>
+  </section>
+
+  <section>
+    <h3>5. Ciência e prazos de recurso</h3>
+    <p class="note" style="margin-top:0">Pedido de reconsideração ao gestor avaliador: até 5 dias corridos da notificação (julgamento em até 30 dias corridos). Recurso hierárquico: até 30 dias corridos da notificação da reconsideração — à CADEP (ADEP) ou à Comissão de Recursos (ADAP). ADEP: recurso contra o Parecer Conclusivo à CADEP em até 30 dias corridos.</p>
+    <div class="sig"><div>Servidor(a) avaliado(a)</div><div>Gestor(a) avaliador(a)</div><div>Data</div></div>
+  </section>
+  <div class="foot"><span>Roteiro de apoio — não substitui o Termo de Avaliação no ARTEComp.</span><span>Base: Cartilha da Avaliação de Desempenho por Competências (SMPOG/SUGESP, 2019).</span></div>
+</main>
+
+<!-- =============================== ABA 2 =============================== -->
+<main class="sheet" id="sheet-pd">
+  <div class="doc-head">
+    <div><div class="org">Prefeitura de Belo Horizonte · Gestão do Desempenho por Competências</div>
+    <h2>Roteiro do Plano de Desenvolvimento</h2></div>
+    <div class="ref">Construído em conjunto com o servidor<br>a partir do Termo de Avaliação</div>
+  </div>
+  <p class="intro">Converta as lacunas apontadas na avaliação em ações concretas de desenvolvimento, usando as Trilhas de Aprendizagem como referência. O plano deve ser acompanhado periodicamente e ajustado sempre que necessário.</p>
+
+  <section class="ident"></section>
+
+  <section>
+    <h3>1. Diagnóstico a partir da avaliação <span class="hint noprint"><button class="addrow" id="btnDiag" style="margin:0;padding:1px 8px">Atualizar</button></span></h3>
+    <div class="diag">
+      <div class="box"><b style="font-size:11px;color:var(--warn)">Lacunas (nota 1 ou 2 – abaixo de “faz normalmente”)</b><div id="diagGaps"></div></div>
+      <div class="box"><b style="font-size:11px;color:var(--ok)">Pontos fortes a potencializar (nota 4 – “atende plenamente”)</b><div id="diagFortes"></div></div>
+    </div>
+    <label class="f" style="margin-top:5px"><span>Prioridades de desenvolvimento acordadas (até 3)</span><textarea rows="2" data-k="pd.prioridades"></textarea></label>
+  </section>
+
+  <section>
+    <h3>2. Ações de desenvolvimento</h3>
+    <table class="fx">
+      <colgroup><col style="width:3%"><col style="width:13%"><col style="width:19%"><col style="width:21%"><col style="width:13%"><col style="width:8%"><col style="width:14%"><col style="width:9%"><col class="noprint" style="width:24px"></colgroup>
+      <thead><tr><th>#</th><th>Competência</th><th>Comportamento a desenvolver</th><th>Ação de desenvolvimento</th><th>Formato (Trilhas)</th><th>Prazo</th><th>Como verificar</th><th>Situação</th><th class="noprint"></th></tr></thead>
+      <tbody data-table="pdAcoes" data-min="5" data-max="9"></tbody>
+    </table>
+    <button class="addrow" data-add="pdAcoes">+ ação</button>
+  </section>
+
+  <section>
+    <h3>3. Compromissos</h3>
+    <div class="grid g2">
+      <label class="f"><span>Do servidor</span><textarea rows="2" data-k="pd.compServ"></textarea></label>
+      <label class="f"><span>Do gestor — apoio, condições e recursos necessários</span><textarea rows="2" data-k="pd.compGest"></textarea></label>
+    </div>
+  </section>
+
+  <section>
+    <h3>4. Revisões periódicas do plano</h3>
+    <table class="fx">
+      <colgroup><col style="width:3%"><col style="width:12%"><col style="width:42.5%"><col style="width:42.5%"><col class="noprint" style="width:24px"></colgroup>
+      <thead><tr><th>#</th><th>Data</th><th>Avanços observados</th><th>Ajustes acordados</th><th class="noprint"></th></tr></thead>
+      <tbody data-table="pdRev" data-min="3" data-max="5"></tbody>
+    </table>
+    <button class="addrow" data-add="pdRev">+ revisão</button>
+  </section>
+
+  <section>
+    <div class="sig"><div>Servidor(a)</div><div>Gestor(a)</div><div>Data</div></div>
+  </section>
+  <div class="foot"><span>Formatos das Trilhas de Aprendizagem: treinamentos presenciais e EaD, livros, artigos, revistas, vídeos, filmes, reuniões de trabalho, cases de sucesso.</span><span>Roteiro de apoio — registro oficial no ARTEComp.</span></div>
+</main>
+
+<!-- =============================== ABA 3 =============================== -->
+<main class="sheet" id="sheet-pa">
+  <div class="doc-head">
+    <div><div class="org">Prefeitura de Belo Horizonte · Gestão do Desempenho por Competências</div>
+    <h2>Roteiro do Plano de Acompanhamento (PADP)</h2></div>
+    <div class="ref">Plano de Acompanhamento do Desempenho Profissional<br>preenchido pelo gestor com o servidor</div>
+  </div>
+  <p class="intro">Planeje, negocie e pactue as atividades, ações e projetos do ciclo; registre os acompanhamentos ao longo do ano, com ajustes e novas pactuações quando necessário.</p>
+
+  <section class="ident"></section>
+
+  <section>
+    <h3>1. Contexto da pactuação</h3>
+    <div class="grid" style="grid-template-columns:2.4fr 1fr 1fr 1fr">
+      <div class="f"><span>Motivo de elaboração</span>
+        <div class="row" style="gap:4px 12px;padding-top:2px">
+          <label class="chk"><input type="radio" name="pa.motivo" value="inicio" data-k="pa.motivo">Início do ciclo</label>
+          <label class="chk"><input type="radio" name="pa.motivo" value="transf" data-k="pa.motivo">Transferência para outro órgão</label>
+          <label class="chk"><input type="radio" name="pa.motivo" value="local" data-k="pa.motivo">Mudança interna de local</label>
+          <label class="chk"><input type="radio" name="pa.motivo" value="gestor" data-k="pa.motivo">Mudança de gestor</label>
+        </div></div>
+      <label class="f"><span>Data da pactuação</span><input type="date" data-k="pa.data"></label>
+      <label class="f"><span>Vigência — início</span><input type="date" data-k="pa.ini"></label>
+      <label class="f"><span>Vigência — término</span><input type="date" data-k="pa.fim"></label>
+    </div>
+    <label class="f" style="margin-top:5px"><span>Objetivos da unidade aos quais o trabalho do servidor se vincula</span><textarea rows="2" data-k="pa.objetivos"></textarea></label>
+  </section>
+
+  <section>
+    <h3>2. Planejamento pactuado <span class="hint">atividades, ações e projetos do ciclo</span></h3>
+    <table class="fx">
+      <colgroup><col style="width:3%"><col style="width:27%"><col style="width:20%"><col style="width:17%"><col style="width:7%"><col style="width:15%"><col style="width:11%"><col class="noprint" style="width:24px"></colgroup>
+      <thead><tr><th>#</th><th>Atividade / ação / projeto</th><th>Entrega esperada</th><th>Critério de qualidade</th><th>Prazo</th><th>Competência exigida</th><th>Situação</th><th class="noprint"></th></tr></thead>
+      <tbody data-table="paAtiv" data-min="6" data-max="10"></tbody>
+    </table>
+    <button class="addrow" data-add="paAtiv">+ atividade</button>
+  </section>
+
+  <section>
+    <h3>3. Registro dos acompanhamentos <span class="hint">verificar execução, ajustar e dar feedback</span></h3>
+    <table class="fx">
+      <colgroup><col style="width:3%"><col style="width:11%"><col style="width:8%"><col style="width:39%"><col style="width:39%"><col class="noprint" style="width:24px"></colgroup>
+      <thead><tr><th>#</th><th>Data</th><th>Itens (nº)</th><th>Situação, ajustes e novas pactuações</th><th>Feedback e orientações</th><th class="noprint"></th></tr></thead>
+      <tbody data-table="paAcomp" data-min="4" data-max="6"></tbody>
+    </table>
+    <button class="addrow" data-add="paAcomp">+ acompanhamento</button>
+  </section>
+
+  <section>
+    <h3>4. Datas-chave do ciclo</h3>
+    <p class="note" style="margin-top:0">Ciclo: 1º/jan a 31/dez · Termo de Avaliação: novembro e dezembro · Mínimo de 60 dias trabalhados (gestor: 40 deles na função) · Um novo PADP deve ser feito em caso de transferência, mudança interna de local de exercício ou mudança de gestor · ADEP: 1ª etapa vai da data de ingresso a 31/dez.</p>
+    <div class="sig"><div>Servidor(a)</div><div>Gestor(a)</div><div>Data</div></div>
+  </section>
+  <div class="foot"><span>Roteiro de apoio — registro oficial do PADP no ARTEComp.</span><span>Base: Cartilha da Avaliação de Desempenho por Competências (SMPOG/SUGESP, 2019).</span></div>
+</main>
+
+<div class="modal" id="mdl" role="dialog" aria-modal="true" aria-labelledby="mdlT">
+  <div class="dlg">
+    <header><h2 id="mdlT">Consolidar preenchimentos</h2><button class="bbtn" data-close>✕</button></header>
+    <div class="bd">
+      <h4 style="margin-top:0">Arquivos</h4>
+      <table><thead><tr><th>#</th><th style="text-align:left">Arquivo</th><th style="text-align:left">Servidor(a)</th><th>Ciclo</th><th>Salvo em</th><th>Campos</th></tr></thead><tbody id="cSrc"></tbody></table>
+      <label class="chk" style="margin-top:6px" id="cCurWrap"><input type="checkbox" id="cCur">Incluir também o preenchimento que está na tela</label>
+      <div id="cWarn"></div>
+      <div class="sumgrid" id="cSum"></div>
+      <h4>Divergências <span class="vals" style="font-weight:400">— escolha o valor que vai para o preenchimento consolidado</span></h4>
+      <div id="cConf"></div>
+      <h4>Tabelas</h4>
+      <div id="cTab" style="font-size:12px"></div>
+      <p class="note">Regras: campos vazios são completados pelos demais arquivos; caixas marcadas em qualquer arquivo ficam marcadas; linhas de tabelas são somadas, sem repetir linhas idênticas; em divergências, o padrão é juntar os textos e, nos demais campos, usar o arquivo salvo mais recentemente.</p>
+    </div>
+    <footer><span class="sp">O preenchimento atual da tela será substituído pelo resultado.</span><button class="bbtn" data-close>Cancelar</button><button class="bbtn pri" id="cApply">Aplicar consolidação</button></footer>
+  </div>
+</div>
+
+<template id="tplIdent">
+  <h3>Identificação</h3>
+  <div class="grid g4">
+    <label class="f"><span>Servidor(a)</span><input type="text" data-k="id.nome"></label>
+    <label class="f"><span>BM / matrícula</span><input type="text" data-k="id.bm"></label>
+    <label class="f"><span>Cargo / função</span><input type="text" data-k="id.cargo"></label>
+    <label class="f"><span>Órgão / unidade de lotação</span><input type="text" data-k="id.lotacao"></label>
+    <label class="f"><span>Gestor(a) imediato(a)</span><input type="text" data-k="id.gestor"></label>
+    <label class="f"><span>Ciclo (ano)</span><input type="number" min="2019" max="2100" data-k="id.ciclo"></label>
+    <label class="f"><span>Modalidade</span><select data-k="id.modal"><option value=""></option><option value="ADAP">ADAP — agente público</option><option value="ADEP">ADEP — estágio probatório</option><option value="ADG">ADG — gestor</option></select></label>
+    <label class="f"><span>Etapa (ADEP)</span><select data-k="id.etapa"><option value=""></option><option>1ª etapa</option><option>2ª etapa</option><option>3ª etapa</option><option>Não se aplica</option></select></label>
+  </div>
+</template>
+
+<script>
+(function(){
+"use strict";
+const APP = "roteiros-desempenho-pbh", VERSAO = 1, LS = APP + ".v1";
+const COMP = [
+  {id:"pro", nome:"Proatividade", ind:[
+    "Antecipa-se às demandas inerentes ao seu trabalho, mobilizando esforços para resolvê-las",
+    "Assume postura positiva diante de desafios identificados, propondo alternativas viáveis para a solução de problemas",
+    "Identifica necessidades de mudança nos processos de trabalho, visando otimizar o tempo de execução para o alcance dos objetivos propostos",
+    "Aprimora-se profissionalmente, buscando seu autodesenvolvimento de forma a melhorar suas habilidades para o exercício de suas atribuições"]},
+  {id:"eq", nome:"Trabalho em Equipe", ind:[
+    "Compartilha conhecimentos e experiências na execução das atividades em equipe, colaborando para o alcance dos resultados pactuados",
+    "Relaciona-se com a equipe de forma colaborativa e participativa, respeitando a diversidade de opiniões em prol de um bom ambiente de trabalho",
+    "Estabelece relacionamento respeitoso e cordial com os membros da equipe estimulando e contribuindo na busca de soluções conjuntas para os desafios apresentados"]},
+  {id:"res", nome:"Orientação para Resultados", ind:[
+    "Compromete-se em alcançar os objetivos acordados com eficiência e qualidade, mobilizando recursos, pessoas e informações",
+    "Identifica possíveis riscos e oportunidades na execução de suas atividades, a fim de garantir entregas efetivas e evitar o retrabalho",
+    "Atua de forma articulada com outras áreas e/ou instituições, identificando oportunidades para o desenvolvimento de ações integradas que garantam o alcance dos resultados",
+    "Organiza e prioriza suas atividades de forma a cumprir os prazos estabelecidos"]}
+];
+const COMP_OPTS = ["","Proatividade","Trabalho em Equipe","Orientação para Resultados","Gestão de Pessoas","Comunicação","Gestão Estratégica","Específica do cargo"];
+const FORMATOS = ["","Treinamento presencial","Curso EaD","Leitura (livro/artigo/revista)","Vídeo / filme","Reunião de trabalho","Case de sucesso","Prática orientada no trabalho","Outro"];
+const SIT_PD = ["","Não iniciada","Em andamento","Concluída","Reprogramada"];
+const SIT_PA = ["","Não iniciada","Em andamento","Concluída","Repactuada","Cancelada"];
+
+const $ = (s,r=document)=>r.querySelector(s), $$ = (s,r=document)=>[...r.querySelectorAll(s)];
+const esc = s => String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const opts = arr => arr.map(o=>`<option value="${esc(o)}">${esc(o)}</option>`).join("");
+const ta = (k,rows=1) => `<textarea rows="${rows}" data-k="${k}"></textarea>`;
+
+/* ---------- montagem ---------- */
+$$(".ident").forEach(s=>s.appendChild($("#tplIdent").content.cloneNode(true)));
+
+const tb = $("#tabAval tbody");
+COMP.forEach(c=>{
+  tb.insertAdjacentHTML("beforeend",`<tr class="comp"><td colspan="2">${esc(c.nome)}<span class="pct" id="pct-${c.id}"></span></td></tr>`);
+  c.ind.forEach((t,i)=>{
+    const k=`av.${c.id}.${i}`;
+    const sc = who => `<div class="scale">${[1,2,3,4].map(v=>`<label title="${v}"><input type="radio" name="${k}.${who}" value="${v}" data-k="${k}.${who}"><span>${v}</span></label>`).join("")}</div>`;
+    tb.insertAdjacentHTML("beforeend",`<tr><td>${esc(t)}</td><td class="c">${sc("g")}</td></tr>`);
+  });
+  tb.insertAdjacentHTML("beforeend",`<tr class="ev"><td colspan="2"><div class="row" style="flex-wrap:nowrap;gap:6px"><span class="ev-lab">Fatos e exemplos observados:</span><div style="flex:1">${ta(`av.${c.id}.ev`)}</div></div></td></tr>`);
+});
+
+const ROWS = {
+  pdAcoes: i => `<td class="cnum">${i+1}</td>
+    <td><select data-k="pdAcoes.${i}.comp">${opts(COMP_OPTS)}</select></td>
+    <td>${ta(`pdAcoes.${i}.comport`)}</td><td>${ta(`pdAcoes.${i}.acao`)}</td>
+    <td><select data-k="pdAcoes.${i}.formato">${opts(FORMATOS)}</select></td>
+    <td><input type="text" data-k="pdAcoes.${i}.prazo" placeholder="mm/aaaa"></td>
+    <td>${ta(`pdAcoes.${i}.verif`)}</td>
+    <td><select data-k="pdAcoes.${i}.sit">${opts(SIT_PD)}</select></td>`,
+  pdRev: i => `<td class="cnum">${i+1}</td><td><input type="date" data-k="pdRev.${i}.data"></td>
+    <td>${ta(`pdRev.${i}.avancos`)}</td><td>${ta(`pdRev.${i}.ajustes`)}</td>`,
+  paAtiv: i => `<td class="cnum">${i+1}</td><td>${ta(`paAtiv.${i}.ativ`)}</td><td>${ta(`paAtiv.${i}.entrega`)}</td>
+    <td>${ta(`paAtiv.${i}.criterio`)}</td><td><input type="text" data-k="paAtiv.${i}.prazo" placeholder="dd/mm"></td>
+    <td><select data-k="paAtiv.${i}.comp">${opts(COMP_OPTS)}</select></td>
+    <td><select data-k="paAtiv.${i}.sit">${opts(SIT_PA)}</select></td>`,
+  paAcomp: i => `<td class="cnum">${i+1}</td><td><input type="date" data-k="paAcomp.${i}.data"></td>
+    <td><input type="text" data-k="paAcomp.${i}.itens" placeholder="ex.: 1–3"></td>
+    <td>${ta(`paAcomp.${i}.situacao`)}</td><td>${ta(`paAcomp.${i}.feedback`)}</td>`
+};
+const counts = {};
+function body(id){return $(`tbody[data-table="${id}"]`)}
+function setRows(id,n){
+  const b=body(id), min=+b.dataset.min, max=+b.dataset.max;
+  n=Math.max(min,Math.min(max,n)); counts[id]=n;
+  b.innerHTML=""; for(let i=0;i<n;i++){
+    const tr=document.createElement("tr");
+    tr.innerHTML=ROWS[id](i)+`<td class="noprint c"><button class="del" data-del="${id}" data-i="${i}" title="Remover linha">×</button></td>`;
+    b.appendChild(tr);
+  }
+  decorate(b); $(`[data-add="${id}"]`).disabled = n>=max;
+}
+function decorate(root){
+  $$("textarea",root).forEach(t=>{
+    if(t.nextElementSibling && t.nextElementSibling.classList.contains("pt")) return;
+    const d=document.createElement("div"); d.className="pt";
+    d.style.setProperty("--mh",(Math.max(1,+t.rows||1)*1.35)+"em");
+    t.after(d);
+  });
+  $$("select",root).forEach(sl=>{
+    if(sl.nextElementSibling && sl.nextElementSibling.classList.contains("ps")) return;
+    const d=document.createElement("div"); d.className="ps"; sl.after(d);
+  });
+}
+Object.keys(ROWS).forEach(id=>setRows(id,+body(id).dataset.min));
+decorate(document);
+
+/* ---------- estado ---------- */
+let state = {};
+function readEl(el){
+  if(el.type==="checkbox") return el.checked;
+  if(el.type==="radio") return el.checked ? el.value : undefined;
+  return el.value;
+}
+function collect(){
+  const d={};
+  $$("[data-k]").forEach(el=>{
+    const k=el.dataset.k, v=readEl(el);
+    if(el.type==="radio"){ if(v!==undefined) d[k]=v; else if(!(k in d)) d[k]=""; }
+    else if(!(k in d) || v!=="" ) d[k]=v;   // campos repetidos (identificação) ficam sincronizados
+  });
+  Object.keys(d).forEach(k=>{if(d[k]===""||d[k]===false) delete d[k]});
+  return d;
+}
+function apply(d){
+  $$("[data-k]").forEach(el=>{
+    const v=d[el.dataset.k];
+    if(el.type==="checkbox") el.checked=!!v;
+    else if(el.type==="radio") el.checked = v!==undefined && String(v)===el.value;
+    else el.value = v ?? "";
+  });
+  syncPrint(); recompute();
+}
+function syncPrint(){
+  $$("textarea").forEach(t=>{const p=t.nextElementSibling; if(p&&p.classList.contains("pt")) p.textContent=t.value});
+  $$("select").forEach(sl=>{const p=sl.nextElementSibling; if(p&&p.classList.contains("ps")) p.textContent=sl.value?sl.options[sl.selectedIndex].text:""});
+}
+
+let origem=null;
+function payload(){
+  const p={app:APP, versao:VERSAO, salvoEm:new Date().toISOString(), linhas:{...counts}, campos:collect()};
+  if(origem) p.consolidadoDe=origem;
+  return p;
+}
+function load(p){
+  if(!p || p.app!==APP || typeof p.campos!=="object") throw new Error("Arquivo não reconhecido como preenchimento destes roteiros.");
+  Object.keys(ROWS).forEach(id=>setRows(id, (p.linhas&&p.linhas[id]) || +body(id).dataset.min));
+  origem = Array.isArray(p.consolidadoDe) ? p.consolidadoDe : null;
+  apply(p.campos);
+}
+function valid(p){ return p && p.app===APP && p.campos && typeof p.campos==="object"; }
+let saveT;
+function autosave(){
+  clearTimeout(saveT);
+  saveT=setTimeout(()=>{try{localStorage.setItem(LS,JSON.stringify(payload())); status("Rascunho salvo no navegador")}catch(e){status("Use “Salvar JSON” para guardar")}},400);
+}
+function status(msg){$("#status").textContent=msg}
+
+/* ---------- cálculos ---------- */
+function n(k){const v=state[k]; return v===undefined?null:+v}
+function recompute(){
+  state=collect();
+  const modal=state["id.modal"]||"";
+  document.body.classList.toggle("is-adep", modal==="ADEP");
+  // elegibilidade
+  const dias=n("av.dias"), dg=n("av.diasGestor"), el=$("#elig");
+  if(dias===null){el.className="chip";el.textContent="Informe os dias"}
+  else{
+    let ok=dias>=60, msg=ok?"Elegível":"Não elegível — menos de 60 dias";
+    if(ok && modal==="ADG"){ if(dg===null){msg="Informe os dias como gestor";ok=null} else if(dg<40){ok=false;msg="Não elegível — menos de 40 dias como gestor"} }
+    el.className="chip "+(ok===null?"":ok?"ok":"no"); el.textContent=msg;
+  }
+  // itens
+  let sf=0,nf=0,tot=0; const itens=[];
+  COMP.forEach(c=>{
+    let cs=0,cn=0;
+    c.ind.forEach((t,i)=>{
+      tot++;
+      const f=n(`av.${c.id}.${i}.g`);
+      if(f!==null){cs+=f;cn++;sf+=f;nf++}
+      itens.push({comp:c.nome,txt:t,f});
+    });
+    const v = cn? pct(cs/cn) : "";
+    $(`#pct-${c.id}`).textContent = v; $(`#k-${c.id}`).textContent = v||"—";
+  });
+  const fin = nf? sf/nf : null;
+  $("#kFinal").textContent = fin===null?"—":pct(fin);
+  $("#kItens").textContent = `${nf}/${tot} itens`;
+  // ADEP
+  const ea=n("av.etapaA"), eb=n("av.etapaB"), vals=[ea,eb,fin===null?null:fin/4*100].filter(v=>v!==null&&!isNaN(v));
+  const m=$("#adepMedia");
+  if(vals.length){const med=vals.reduce((x,y)=>x+y,0)/vals.length; m.textContent=`Média (${vals.length} etapa${vals.length>1?"s":""}): ${med.toFixed(1).replace(".",",")}%`+(vals.length===3?(med>=70?" · APTO":" · INAPTO"):""); m.className="chip "+(vals.length===3?(med>=70?"ok":"no"):"");}
+  else{m.textContent="Média: —";m.className="chip"}
+  // diagnóstico
+  const gaps=itens.filter(x=>x.f!==null&&x.f<3).sort((x,y)=>x.f-y.f), fortes=itens.filter(x=>x.f!==null&&x.f>=4);
+  const li = x=>`<li><b>${esc(x.comp)}:</b> ${esc(x.txt)} <span class="chip">${x.f}</span></li>`;
+  $("#diagGaps").innerHTML = gaps.length?`<ul>${gaps.map(li).join("")}</ul>`:`<div class="empty">${nf?"Nenhum comportamento abaixo do esperado.":"Preencha a aba 1 para gerar o diagnóstico."}</div>`;
+  $("#diagFortes").innerHTML = fortes.length?`<ul>${fortes.map(li).join("")}</ul>`:`<div class="empty">${nf?"Nenhum item com nota 4.":"Preencha a aba 1 para gerar o diagnóstico."}</div>`;
+}
+function pct(v){return (v/4*100).toFixed(1).replace(".",",")+"%"}
+
+/* ---------- eventos ---------- */
+document.addEventListener("input",e=>{
+  const el=e.target; if(!el.dataset||!el.dataset.k) return;
+  if(el.type!=="radio"&&el.type!=="checkbox") $$(`[data-k="${CSS.escape(el.dataset.k)}"]`).forEach(o=>{if(o!==el)o.value=el.value});
+  if(el.tagName==="TEXTAREA"){const p=el.nextElementSibling;if(p&&p.classList.contains("pt"))p.textContent=el.value}
+  recompute(); autosave();
+});
+document.addEventListener("change",e=>{ if(e.target.dataset&&e.target.dataset.k){syncPrint();recompute();autosave()} });
+document.addEventListener("click",e=>{
+  const t=e.target;
+  if(t.dataset.add){ const keep=collect(); setRows(t.dataset.add,counts[t.dataset.add]+1); apply(keep); autosave(); }
+  if(t.dataset.del){
+    const id=t.dataset.del, i=+t.dataset.i, d=collect(), cnt=counts[id], out={};
+    if(cnt<=+body(id).dataset.min){ // no mínimo de linhas: apenas limpa a linha
+      Object.keys(d).forEach(k=>{if(!k.startsWith(`${id}.${i}.`)) out[k]=d[k]});
+      apply(out); autosave(); return;
+    }
+    // remove a linha e desloca as seguintes para cima
+    Object.keys(d).forEach(k=>{
+      const m=k.match(new RegExp(`^${id}\\.(\\d+)\\.(.+)$`));
+      if(!m){out[k]=d[k];return}
+      const r=+m[1]; if(r<i) out[k]=d[k]; else if(r>i) out[`${id}.${r-1}.${m[2]}`]=d[k];
+    });
+    setRows(id,cnt-1); apply(out); autosave();
+  }
+});
+$$(".tab").forEach(b=>b.addEventListener("click",()=>{
+  $$(".tab").forEach(x=>x.classList.toggle("active",x===b));
+  $$(".sheet").forEach(s=>s.classList.toggle("active",s.id==="sheet-"+b.dataset.tab));
+  recompute(); window.scrollTo(0,0);
+}));
+$("#btnDiag").addEventListener("click",recompute);
+$("#btnSave").addEventListener("click",()=>{
+  const p=payload(), nome=(p.campos["id.nome"]||"preenchimento").normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^\w]+/g,"_").replace(/^_|_$/g,"").slice(0,40);
+  const blob=new Blob([JSON.stringify(p,null,2)],{type:"application/json"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob);
+  a.download=`roteiros_desempenho_${nome}_${p.campos["id.ciclo"]||"ciclo"}.json`;
+  document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500);
+  status("JSON salvo");
+});
+$("#btnOpen").addEventListener("click",()=>$("#fileIn").click());
+$("#fileIn").addEventListener("change",async e=>{
+  const files=[...e.target.files]; e.target.value=""; if(!files.length) return;
+  const ok=[], bad=[];
+  for(const f of files){
+    try{ const p=JSON.parse(await f.text()); if(valid(p)) ok.push({nome:f.name,p}); else bad.push(f.name); }
+    catch(err){ bad.push(f.name); }
+  }
+  const badMsg = bad.length ? "Arquivo(s) não reconhecido(s) como preenchimento destes roteiros:\n• "+bad.join("\n• ") : "";
+  if(!ok.length){ alert(badMsg); return; }
+  if(ok.length===1){
+    if(bad.length) alert(badMsg+"\n\nSomente “"+ok[0].nome+"” será aberto.");
+    try{load(ok[0].p); autosave(); status("Preenchimento carregado")}catch(err){alert(err.message)}
+    return;
+  }
+  Consol.open(ok, bad);
+});
+
+/* ---------- consolidação de vários JSON ---------- */
+const Consol = (()=>{
+  const TABLES=Object.keys(ROWS), reT=new RegExp(`^(${TABLES.join("|")})\\.(\\d+)\\.(.+)$`);
+  const TABNOME={pdAcoes:"Plano de Desenvolvimento · Ações",pdRev:"Plano de Desenvolvimento · Revisões",paAtiv:"PADP · Planejamento pactuado",paAcomp:"PADP · Acompanhamentos"};
+  const SEC={id:"Identificação",av:"Avaliação",pd:"Plano de Desenvolvimento",pa:"PADP"};
+  let srcs=[], badList=[], result=null, conflicts=[];
+
+  const firstEl = k => document.querySelector(`[data-k="${CSS.escape(k)}"]`);
+  const isText = k => { const el=firstEl(k); return !!el && el.tagName==="TEXTAREA"; };
+  const isCheck = k => { const el=firstEl(k); return !!el && el.type==="checkbox"; };
+  function label(k){
+    let m=k.match(/^av\.(\w+)\.(\d+)\.g$/);
+    if(m){const c=COMP.find(x=>x.id===m[1]); const t=c.ind[+m[2]]; return `Avaliação · ${c.nome} · ${t.length>70?t.slice(0,68)+"…":t}`;}
+    m=k.match(/^av\.(\w+)\.ev$/);
+    if(m){const c=COMP.find(x=>x.id===m[1]); return `Avaliação · ${c.nome} · fatos e exemplos`;}
+    const el=firstEl(k), sec=SEC[k.split(".")[0]]||"";
+    if(!el) return k;
+    const sp=el.closest(".f")&&el.closest(".f").querySelector(":scope>span");
+    const txt = sp ? sp.textContent : (el.closest("label")?el.closest("label").textContent:(el.placeholder||k));
+    return (sec?sec+" · ":"")+txt.trim();
+  }
+  function show(k,v){
+    const els=[...document.querySelectorAll(`[data-k="${CSS.escape(k)}"]`)];
+    const el=els[0]; if(!el) return String(v);
+    if(el.tagName==="SELECT"){const o=[...el.options].find(o=>o.value===String(v)); return o?o.text:String(v);}
+    if(el.type==="radio" && !/^av\./.test(k)){const r=els.find(x=>x.value===String(v)); return r?r.closest("label").textContent.trim():String(v);}
+    if(el.type==="date"&&/^\d{4}-\d{2}-\d{2}$/.test(v)){const [y,m,d]=v.split("-");return `${d}/${m}/${y}`;}
+    const s=String(v).replace(/\s+/g," "); return s.length>90?s.slice(0,88)+"…":s;
+  }
+  const fmtData = iso => { if(!iso) return "—"; const d=new Date(iso); return isNaN(d)?"—":d.toLocaleString("pt-BR",{dateStyle:"short",timeStyle:"short"}); };
+
+  function sources(){
+    const list=srcs.slice();
+    if($("#cCur").checked) list.push({nome:"(tela atual)", p:payload(), atual:true});
+    // ordem: mais antigo → mais recente
+    return list.map((s,i)=>({...s,i})).sort((a,b)=>(Date.parse(a.p.salvoEm)||0)-(Date.parse(b.p.salvoEm)||0));
+  }
+
+  function merge(){
+    const L=sources();
+    const fields={}, rows={}; TABLES.forEach(t=>rows[t]=[]);
+    L.forEach((s,si)=>{
+      const per={};
+      Object.entries(s.p.campos).forEach(([k,v])=>{
+        if(v===""||v===false||v==null) return;
+        const m=k.match(reT);
+        if(m){ ((per[m[1]]=per[m[1]]||{})[m[2]]=per[m[1]][m[2]]||{})[m[3]]=v; return; }
+        (fields[k]=fields[k]||[]).push({si,v});
+      });
+      Object.entries(per).forEach(([t,obj])=>Object.keys(obj).sort((a,b)=>a-b).forEach(r=>rows[t].push({si,row:obj[r]})));
+    });
+    const campos={}; conflicts=[];
+    Object.entries(fields).forEach(([k,arr])=>{
+      if(isCheck(k)){ campos[k]=arr.some(x=>x.v===true||x.v==="true"); return; }
+      const distinct=[]; arr.forEach(x=>{const d=distinct.find(y=>String(y.v).trim()===String(x.v).trim()); if(d) d.src.push(x.si); else distinct.push({v:x.v,src:[x.si]});});
+      if(distinct.length===1){ campos[k]=distinct[0].v; return; }
+      const text=isText(k);
+      const lastSi=Math.max(...arr.map(x=>x.si)), li=distinct.findIndex(d=>d.src.includes(lastSi));
+      conflicts.push({k,text,distinct,choice: text?"join":String(li)});
+    });
+    const tabs={}, linhas={};
+    TABLES.forEach(t=>{
+      const seen=new Set(), keep=[]; let dup=0;
+      rows[t].forEach(r=>{const sig=JSON.stringify(Object.keys(r.row).sort().map(c=>[c,String(r.row[c]).trim()])); if(seen.has(sig)){dup++;return} seen.add(sig); keep.push(r);});
+      const max=+body(t).dataset.max, min=+body(t).dataset.min;
+      tabs[t]={total:rows[t].length,dup,kept:keep.slice(0,max),drop:keep.slice(max)};
+      tabs[t].kept.forEach((r,i)=>Object.entries(r.row).forEach(([c,v])=>campos[`${t}.${i}.${c}`]=v));
+      linhas[t]=Math.max(min,tabs[t].kept.length);
+    });
+    result={L,campos,linhas,tabs};
+  }
+
+  function render(){
+    merge();
+    const {L,tabs}=result;
+    $("#cSrc").innerHTML=L.map((s,n)=>`<tr><td class="cnum">${n+1}</td><td>${esc(s.nome)}</td><td>${esc(s.p.campos["id.nome"]||"—")}</td><td class="c">${esc(s.p.campos["id.ciclo"]||"—")}</td><td class="c">${s.atual?"agora":fmtData(s.p.salvoEm)}</td><td class="c">${Object.keys(s.p.campos).length}</td></tr>`).join("");
+    const nomes=new Set(L.map(s=>(s.p.campos["id.nome"]||"").trim().toLowerCase()).filter(Boolean));
+    const ciclos=new Set(L.map(s=>String(s.p.campos["id.ciclo"]||"").trim()).filter(Boolean));
+    let w=""; 
+    if(badList.length) w+=`<div class="warnbox">Ignorado(s) por não serem preenchimentos destes roteiros: ${badList.map(esc).join(", ")}.</div>`;
+    if(nomes.size>1) w+=`<div class="warnbox"><b>Atenção:</b> os arquivos se referem a servidores diferentes (${nomes.size}). Confira se a consolidação é mesmo desejada.</div>`;
+    if(ciclos.size>1) w+=`<div class="warnbox"><b>Atenção:</b> os arquivos são de ciclos diferentes (${[...ciclos].map(esc).join(", ")}).</div>`;
+    $("#cWarn").innerHTML=w;
+    const nAuto=Object.keys(result.campos).filter(k=>!reT.test(k)).length;
+    const nRows=Object.values(tabs).reduce((a,t)=>a+t.kept.length,0), nDrop=Object.values(tabs).reduce((a,t)=>a+t.drop.length,0);
+    $("#cSum").innerHTML=[["Arquivos",L.length],["Campos combinados sem divergência",nAuto],["Divergências a decidir",conflicts.length],["Linhas de tabela"+(nDrop?` · ${nDrop} excedente(s)`:""),nRows]]
+      .map(([a,b])=>`<div class="kpi"><span>${a}</span><b>${b}</b></div>`).join("");
+    $("#cConf").innerHTML = conflicts.length ? `<table><colgroup><col style="width:34%"><col><col style="width:250px"></colgroup>
+      <thead><tr><th style="text-align:left">Campo</th><th style="text-align:left">Valores encontrados</th><th>Usar</th></tr></thead><tbody>${
+      conflicts.map((c,ci)=>`<tr><td>${esc(label(c.k))}</td><td class="vals">${c.distinct.map(d=>`<div title="${esc(String(d.v))}"><b>${d.src.map(x=>"#"+(x+1)).join(", ")}:</b> ${esc(show(c.k,d.v))}</div>`).join("")}</td>
+      <td><select data-conf="${ci}">${c.text?`<option value="join">Juntar os textos</option>`:""}${c.distinct.map((d,di)=>`<option value="${di}">Valor de ${d.src.map(x=>"#"+(x+1)).join(", ")}</option>`).join("")}</select></td></tr>`).join("")}</tbody></table>`
+      : `<p class="note" style="margin:0">Nenhuma divergência: os arquivos se completam.</p>`;
+    $$("#cConf select").forEach(sl=>{sl.value=conflicts[+sl.dataset.conf].choice; sl.addEventListener("change",()=>conflicts[+sl.dataset.conf].choice=sl.value);});
+    $("#cTab").innerHTML = TABLES.filter(t=>tabs[t].total).map(t=>{const x=tabs[t];
+      let h=`<div><b>${TABNOME[t]}:</b> ${x.kept.length} linha(s) consolidada(s)`+(x.dup?` · ${x.dup} repetida(s) removida(s)`:"");
+      if(x.drop.length) h+=`<div class="warnbox">Limite de ${body(t).dataset.max} linhas (para manter o roteiro em até 2 páginas). Ficaram de fora: ${x.drop.map(r=>esc(Object.values(r.row).find(v=>typeof v==="string"&&v.length>3)||"(linha)").slice(0,60)).join(" · ")}</div>`;
+      return h+"</div>";}).join("") || `<p class="note" style="margin:0">Nenhuma linha preenchida nas tabelas.</p>`;
+  }
+
+  function applyIt(){
+    const campos={...result.campos};
+    conflicts.forEach(c=>{
+      campos[c.k] = c.choice==="join" ? c.distinct.map(d=>String(d.v).trim()).join("\n") : c.distinct[+c.choice].v;
+    });
+    load({app:APP,versao:VERSAO,linhas:result.linhas,campos,consolidadoDe:result.L.map(s=>s.nome)});
+    autosave(); close();
+    status(`Consolidado de ${result.L.length} arquivos`);
+  }
+  function open(list,bad){
+    srcs=list; badList=bad||[];
+    const hasCur=Object.keys(collect()).length>0;
+    $("#cCur").checked=false; $("#cCurWrap").style.display=hasCur?"":"none";
+    render(); $("#mdl").classList.add("open"); $("#cApply").focus();
+  }
+  function close(){ $("#mdl").classList.remove("open"); }
+  $("#cCur").addEventListener("change",render);
+  $("#cApply").addEventListener("click",applyIt);
+  $$("#mdl [data-close]").forEach(b=>b.addEventListener("click",close));
+  $("#mdl").addEventListener("click",e=>{if(e.target.id==="mdl")close()});
+  document.addEventListener("keydown",e=>{if(e.key==="Escape"&&$("#mdl").classList.contains("open"))close()});
+  return {open, _state:()=>({result,conflicts})};
+})();
+$("#btnPrint").addEventListener("click",()=>{document.body.classList.remove("print-all"); syncPrint(); window.print()});
+$("#btnPrintAll").addEventListener("click",()=>{document.body.classList.add("print-all"); syncPrint(); window.print()});
+window.addEventListener("afterprint",()=>document.body.classList.remove("print-all"));
+$("#btnClear").addEventListener("click",()=>{
+  if(!confirm("Apagar todo o preenchimento? Salve um JSON antes, se quiser guardar.")) return;
+  Object.keys(ROWS).forEach(id=>setRows(id,+body(id).dataset.min)); apply({});
+  try{localStorage.removeItem(LS)}catch(e){} status("Formulário limpo");
+});
+
+/* ---------- inicialização ---------- */
+window.RoteirosApp={payload,load,Consol};
+try{const s=localStorage.getItem(LS); if(s){load(JSON.parse(s)); status("Rascunho recuperado")} else recompute()}catch(e){recompute()}
+})();
+</script>
+</body>
+</html>
